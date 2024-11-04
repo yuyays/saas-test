@@ -6,11 +6,9 @@ import { ImageKitProvider, IKImage, IKUpload } from "imagekitio-next";
 
 const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT;
 const publicKey = process.env.NEXT_PUBLIC_PUBLIC_KEY;
-const localhost = process.env.BASE_URL;
 const authenticator = async () => {
   try {
-    const response = await fetch("BASE_URL/api/auth");
-
+    const response = await fetch(`api/auth`);
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
