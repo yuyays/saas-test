@@ -16,7 +16,7 @@ import { signOut } from "@/app/(login)/actions";
 import { useRouter } from "next/navigation";
 import { Providers } from "../providers";
 
-function Header() {
+export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, setUser } = useUser();
   const router = useRouter();
@@ -94,10 +94,7 @@ function Header() {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <section className="flex flex-col min-h-screen">
-      <Providers>
-        <Header />
-        {children}
-      </Providers>
+      <Providers>{children}</Providers>
     </section>
   );
 }
