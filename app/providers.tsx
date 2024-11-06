@@ -1,3 +1,4 @@
+"use client";
 import { ImageKitProvider } from "imagekitio-next";
 
 const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT;
