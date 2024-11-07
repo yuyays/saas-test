@@ -36,7 +36,7 @@ export function Header() {
         </Link>
         <div className="flex items-center space-x-4">
           <Link
-            href="/image"
+            href="/galleries"
             className="text-sm font-medium text-gray-700 hover:text-gray-900"
           >
             feature
