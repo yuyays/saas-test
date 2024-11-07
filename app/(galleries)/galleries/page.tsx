@@ -1,29 +1,34 @@
-import { getUser } from "@/lib/db/queries";
 import MediaGallery from "./ImageGallery";
 import { MediaFile } from "./ImageGallery";
 import imageKit from "@/lib/iamgeKit";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
+import { userMedia } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db/drizzle";
 
-async function fetchMedia(): Promise<MediaFile[]> {
+async function fetchMedia(userId: number): Promise<MediaFile[]> {
   try {
-    const result = await imageKit.listFiles({
-      skip: 0,
-      limit: 50,
+    const userMediaItems = await db
+      .select()
+      .from(userMedia)
+      .where(eq(userMedia.userId, userId));
+
+    const mediaPromises = userMediaItems.map(async (item) => {
+      const fileDetails = await imageKit.getFileDetails(item.fileId);
+      return {
+        fileId: fileDetails.fileId,
+        name: fileDetails.name,
+        url: fileDetails.url,
+        fileType: fileDetails.fileType,
+        height: fileDetails.height,
+        width: fileDetails.width,
+        // audioCodec: fileDetails.audioCodec,
+        // videoCodec: fileDetails.videoCodec,
+      };
     });
 
-    return result
-      .filter((file: any) => file.url && file.url.trim() !== "")
-      .map((file: MediaFile) => ({
-        fileId: file.fileId,
-        name: file.name,
-        url: file.url,
-        fileType: file.fileType,
-        height: file.height,
-        width: file.width,
-        audioCodec: file.audioCodec,
-        videoCodec: file.videoCodec,
-      }));
+    return await Promise.all(mediaPromises);
   } catch (error) {
     console.error("Failed to fetch media:", error);
     return [];
@@ -38,16 +43,19 @@ export default async function GalleryPage() {
   if (!session) {
     redirect("/sign-in");
   }
-  const mediaItems = await fetchMedia();
-
+  const mediaItems = await fetchMedia(session.user.id);
   if (mediaItems.length === 0) {
-    return <div>No media found or error occurred while fetching media.</div>;
+    return (
+      <div>
+        please singin/login. No media found or error occurred while fetching
+        media.
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Media Gallery</h1>
-      <MediaGallery media={mediaItems} />
+      <MediaGallery initialMedia={mediaItems} />
     </div>
   );
 }
