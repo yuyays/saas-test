@@ -1,17 +1,9 @@
 "use client";
-import { IKImage, IKVideo } from "imagekitio-next";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { useState, useEffect, useRef } from "react";
-import MediaUploadComponent from "./UploadMedia";
 import { Button } from "@/components/ui/button";
+import MediaUploadComponent from "./UploadMedia";
+import { GalleryCard } from "./GalleryCard";
 
 export type MediaFile = {
   fileId: string;
@@ -51,8 +43,6 @@ export default function MediaGallery({
     setIsUploading(false);
   };
 
-  const isVideo = (fileType: string) => fileType === "non-image";
-
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -74,46 +64,16 @@ export default function MediaGallery({
       {media.length === 0 ? (
         <div>No media found. Start by uploading some content!</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          ref={containerRef}
+        >
           {media.map((item) => (
-            <Card
+            <GalleryCard
               key={item.fileId}
-              className="overflow-hidden"
-              ref={containerRef}
-            >
-              <CardHeader>
-                <CardTitle className="truncate text-lg">{item.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AspectRatio ratio={16 / 9}>
-                  {item.url && item.url.trim() !== "" ? (
-                    isVideo(item.fileType) ? (
-                      <IKVideo
-                        src={item.url}
-                        width={containerWidth}
-                        height={(containerWidth * 9) / 16}
-                        controls={true}
-                        className="rounded-md object-cover w-full h-full"
-                      />
-                    ) : (
-                      <IKImage
-                        src={item.url}
-                        alt={item.name}
-                        width={containerWidth}
-                        height={(containerWidth * 9) / 16}
-                        className="rounded-md object-cover w-full h-full"
-                      />
-                    )
-                  ) : (
-                    <Skeleton className="w-full h-full" />
-                  )}
-                </AspectRatio>
-              </CardContent>
-              <CardFooter className="text-sm text-muted-foreground">
-                {isVideo(item.fileType) ? "Video" : "Image"} • {item.width}x
-                {item.height}
-              </CardFooter>
-            </Card>
+              item={item}
+              containerWidth={containerWidth}
+            />
           ))}
         </div>
       )}
