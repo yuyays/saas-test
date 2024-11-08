@@ -16,7 +16,7 @@ export type MediaFile = {
   videoCodec?: string;
 };
 
-export default function MediaGallery({
+export default function GalleryList({
   initialMedia,
 }: {
   initialMedia: MediaFile[];

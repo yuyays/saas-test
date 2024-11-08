@@ -1,4 +1,4 @@
-import MediaGallery from "./ImageGallery";
+import GalleryList from "./GalleryList";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { fetchMedia } from "./queries";
@@ -18,7 +18,7 @@ export default async function GalleryPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <MediaGallery initialMedia={mediaItems} />
+      <GalleryList initialMedia={mediaItems} />
     </div>
   );
 }

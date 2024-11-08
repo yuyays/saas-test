@@ -1,6 +1,3 @@
-"use client";
-
-import { IKImage, IKVideo } from "imagekitio-next";
 import {
   Card,
   CardContent,
@@ -10,52 +7,18 @@ import {
 } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MediaFile } from "./ImageGallery";
-import { Suspense, useState } from "react";
+import { MediaFile } from "./GalleryList";
+import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/spinner";
+import { GalleryMedia } from "./GalleryMedia";
 
-type GalleryCardProps = {
+export function GalleryCard({
+  item,
+  containerWidth,
+}: {
   item: MediaFile;
   containerWidth: number;
-};
-
-const MediaComponent = ({ item, containerWidth }: GalleryCardProps) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const isVideo = (fileType: string) => fileType === "non-image";
-
-  return (
-    <div className="relative">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-          <LoadingSpinner />
-        </div>
-      )}
-      {isVideo(item.fileType) ? (
-        <IKVideo
-          src={item.url}
-          width={containerWidth}
-          height={(containerWidth * 9) / 16}
-          controls={true}
-          className="rounded-md object-cover w-full h-full"
-          onLoadedData={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)}
-        />
-      ) : (
-        <IKImage
-          src={item.url}
-          alt={item.name}
-          width={containerWidth}
-          height={(containerWidth * 9) / 16}
-          className="rounded-md object-cover w-full h-full"
-          onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)}
-        />
-      )}
-    </div>
-  );
-};
-
-export function GalleryCard({ item, containerWidth }: GalleryCardProps) {
+}) {
   const isVideo = (fileType: string) => fileType === "non-image";
 
   return (
@@ -73,7 +36,7 @@ export function GalleryCard({ item, containerWidth }: GalleryCardProps) {
                 </div>
               }
             >
-              <MediaComponent item={item} containerWidth={containerWidth} />
+              <GalleryMedia item={item} containerWidth={containerWidth} />
             </Suspense>
           ) : (
             <Skeleton className="w-full h-full" />

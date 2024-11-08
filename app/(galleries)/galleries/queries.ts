@@ -1,7 +1,7 @@
 import { userMedia } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/drizzle";
-import { MediaFile } from "./ImageGallery";
+import { MediaFile } from "./GalleryList";
 import imageKit from "@/lib/iamgeKit";
 
 export async function fetchMedia(userId: number): Promise<MediaFile[]> {

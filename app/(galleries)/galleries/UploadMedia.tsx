@@ -1,7 +1,7 @@
 "use client";
 import { IKUpload } from "imagekitio-next";
 import { useState } from "react";
-import { MediaFile } from "./ImageGallery";
+import { MediaFile } from "./GalleryList";
 
 type MediaUploadComponentProps = {
   onUploadSuccess: (newMedia: MediaFile) => void;
