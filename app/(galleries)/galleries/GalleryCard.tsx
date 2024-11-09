@@ -11,7 +11,7 @@ import { MediaFile } from "./GalleryList";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { GalleryMedia } from "./GalleryMedia";
-
+//GalleryCard focuses on displaying individual media items
 export function GalleryCard({
   item,
   containerWidth,
