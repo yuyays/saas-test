@@ -6,7 +6,6 @@ import { fetchMedia } from "./queries";
 export default async function GalleryPage() {
   const session = await getSession();
   session ? { user: session.user } : null;
-  console.log(session, session?.user);
 
   if (!session) {
     redirect("/sign-in");

@@ -11,6 +11,7 @@ import { MediaFile } from "./GalleryList";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { GalleryMedia } from "./GalleryMedia";
+import Link from "next/link";
 //GalleryCard focuses on displaying individual media items
 export function GalleryCard({
   item,
@@ -22,31 +23,33 @@ export function GalleryCard({
   const isVideo = (fileType: string) => fileType === "non-image";
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
-        <CardTitle className="truncate text-lg">{item.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <AspectRatio ratio={16 / 9}>
-          {item.url && item.url.trim() !== "" ? (
-            <Suspense
-              fallback={
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <LoadingSpinner />
-                </div>
-              }
-            >
-              <GalleryMedia item={item} containerWidth={containerWidth} />
-            </Suspense>
-          ) : (
-            <Skeleton className="w-full h-full" />
-          )}
-        </AspectRatio>
-      </CardContent>
-      <CardFooter className="text-sm text-muted-foreground">
-        {isVideo(item.fileType) ? "Video" : "Image"} • {item.width}x
-        {item.height}
-      </CardFooter>
-    </Card>
+    <Link href={`/galleries/${item.fileId}`}>
+      <Card className="overflow-hidden">
+        <CardHeader>
+          <CardTitle className="truncate text-lg">{item.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AspectRatio ratio={16 / 9}>
+            {item.url && item.url.trim() !== "" ? (
+              <Suspense
+                fallback={
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <LoadingSpinner />
+                  </div>
+                }
+              >
+                <GalleryMedia item={item} containerWidth={containerWidth} />
+              </Suspense>
+            ) : (
+              <Skeleton className="w-full h-full" />
+            )}
+          </AspectRatio>
+        </CardContent>
+        <CardFooter className="text-sm text-muted-foreground">
+          {isVideo(item.fileType) ? "Video" : "Image"} • {item.width}x
+          {item.height}
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
