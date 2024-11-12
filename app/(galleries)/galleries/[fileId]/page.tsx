@@ -8,11 +8,10 @@ import { getSession } from "@/lib/auth/session";
 export default async function MediaPage({
   params,
 }: {
-  params: {
-    fileId: string;
-  };
+  params: Promise<{ fileId: string }>;
 }) {
-  const { fileId } = params;
+  const { fileId } = await params;
+  //const fileId = (await params).fileId;
 
   if (!fileId) {
     notFound();
