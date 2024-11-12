@@ -12,7 +12,7 @@ export default async function MediaPage({
     fileId: string;
   };
 }) {
-  const { fileId } = await params;
+  const { fileId } = params;
 
   if (!fileId) {
     notFound();
