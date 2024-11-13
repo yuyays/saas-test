@@ -1,11 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import MediaUploadComponent from "./UploadMedia";
-import { GalleryCard } from "./GalleryCard";
 import { useContainerWidth } from "./hooks/useContainerWidth";
-import { GalleryHeader } from "./GalleryHeader";
 import { GalleryGrid } from "./GalleryGrid";
 
 export type MediaFile = {
@@ -17,40 +13,25 @@ export type MediaFile = {
   width: number;
   audioCodec?: string;
   videoCodec?: string;
+  filePath?: string;
 };
 
-type GalleryListProps = {
+export default function GalleryList({
+  initialMedia,
+}: {
   initialMedia: MediaFile[];
-};
-
-export default function GalleryList({ initialMedia }: GalleryListProps) {
-  const [media, setMedia] = useState<MediaFile[]>(initialMedia);
-  const [isUploading, setIsUploading] = useState(false);
+}) {
   const [containerWidth, containerRef] = useContainerWidth();
-
-  const handleUploadSuccess = (newMedia: MediaFile) => {
-    setMedia((prevMedia) => [newMedia, ...prevMedia]);
-    setIsUploading(false);
-  };
 
   return (
     <div className="container mx-auto py-8">
-      <GalleryHeader
-        isUploading={isUploading}
-        onUploadClick={() => setIsUploading(true)}
-      />
-
-      {isUploading && (
-        <div className="mb-6">
-          <MediaUploadComponent
-            onUploadSuccess={handleUploadSuccess}
-            onUploadError={() => setIsUploading(false)}
-          />
-        </div>
-      )}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Media Gallery</h1>
+        <MediaUploadComponent />
+      </div>
 
       <GalleryGrid
-        media={media}
+        media={initialMedia}
         containerWidth={containerWidth}
         containerRef={containerRef}
       />
