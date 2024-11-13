@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { GalleryMedia } from "../GalleryMedia";
-import { ArrowLeft, Edit2, Save } from "lucide-react"; // Optional: for icons
+import { ArrowLeft, Edit2, Save, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { MediaFile } from "../GalleryList";
-import { deleteMedia } from "../queries";
+import { deleteMedia, saveEditedImage, updateMedia } from "../queries";
+import { ImageEditor } from "./ImageEditor";
 
 type MediaDetailsProps = {
   media: MediaFile;
@@ -17,25 +18,50 @@ type MediaDetailsProps = {
 export default function MediaDetails({ media, userId }: MediaDetailsProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [isImageEditing, setIsImageEditing] = useState(false);
   const [editedMedia, setEditedMedia] = useState(media);
+
+  const containerWidth = 1024; // You can make this dynamic if needed
+  const aspectRatio = 16 / 9;
+  const calculatedHeight = Math.round(containerWidth / aspectRatio);
 
   const handleSave = async () => {
     try {
-      //await updateMedia(media.fileId, userId, editedMedia);
+      await updateMedia(media.fileId, userId, editedMedia);
       setIsEditing(false);
       router.refresh();
     } catch (error) {
       console.error("Failed to update media:", error);
     }
   };
+
   const handleDelete = async () => {
     try {
       await deleteMedia(media.fileId, userId);
-      router.push("/galleries"); // Redirect to gallery list
+      router.push("/galleries");
     } catch (error) {
       console.error("Failed to delete media:", error);
     }
   };
+
+  const handleImageEdit = async (transformations: Array<{ raw: string }>) => {
+    try {
+      await saveEditedImage(media.fileId, userId, transformations);
+      setIsImageEditing(false);
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to save edited image:", error);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (media.fileType.includes("video")) {
+      setIsEditing(true);
+    } else {
+      setIsImageEditing(true);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -48,47 +74,48 @@ export default function MediaDetails({ media, userId }: MediaDetailsProps) {
           <ArrowLeft className="h-4 w-4" />
           Back to Gallery
         </Button>
-        <Button
-          onClick={isEditing ? handleSave : () => setIsEditing(true)}
-          className="flex items-center gap-2"
-        >
-          {isEditing ? (
-            <>
-              <Save className="h-4 w-4" />
-              Save Changes
-            </>
-          ) : (
-            <>
-              <Edit2 className="h-4 w-4" />
-              Edit Details
-            </>
-          )}
-        </Button>
-        <Button
-          onClick={isEditing ? handleDelete : () => setIsEditing(true)}
-          className="flex items-center gap-2"
-        >
-          {isEditing ? (
-            <>
-              <Save className="h-4 w-4" />
-              Save Changes
-            </>
-          ) : (
-            <>
-              <Edit2 className="h-4 w-4" />
-              delete Details
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={isEditing ? handleSave : handleEditClick}
+            className="flex items-center gap-2"
+          >
+            {isEditing ? (
+              <>
+                <Save className="h-4 w-4" />
+                Save Changes
+              </>
+            ) : (
+              <>
+                <Edit2 className="h-4 w-4" />
+                Edit {media.fileType.includes("video") ? "Details" : "Image"}
+              </>
+            )}
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </Button>
+        </div>
       </div>
 
       {/* Media Display */}
       <div className="aspect-video w-full max-w-4xl mx-auto">
-        <GalleryMedia
-          item={media}
-          containerWidth={1024} // You might want to calculate this
-        />
+        <GalleryMedia item={media} containerWidth={1024} />
       </div>
+
+      {/* Image Editor */}
+      {!media.fileType.includes("video") && (
+        <ImageEditor
+          media={media}
+          isOpen={isImageEditing}
+          onClose={() => setIsImageEditing(false)}
+          onSave={handleImageEdit}
+        />
+      )}
 
       {/* Media Details */}
       <div className="max-w-2xl mx-auto space-y-4">
