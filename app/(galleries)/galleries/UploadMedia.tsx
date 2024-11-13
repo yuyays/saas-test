@@ -3,7 +3,7 @@
 import { IKUpload } from "imagekitio-next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { uploadMediaToDatabase } from "./queries";
 import { useToast } from "@/hooks/use-toast";
@@ -60,7 +60,9 @@ export default function MediaUploadComponent() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Upload Media</h2>
+            <DialogTitle className="text-lg font-semibold">
+              Upload Media
+            </DialogTitle>
 
             {uploading && (
               <div className="flex items-center justify-center p-4">
