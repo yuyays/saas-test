@@ -5,7 +5,7 @@ import { UserProvider } from "@/lib/auth";
 import { getUser } from "@/lib/db/queries";
 import { Providers } from "./providers";
 import { Header } from "./(dashboard)/layout";
-
+import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: "Next.js SaaS Starter",
   description: "Get started quickly with Next.js, Postgres, and Stripe.",
@@ -34,6 +34,7 @@ export default function RootLayout({
           <Providers>
             <Header />
             {children}
+            <Toaster />
           </Providers>
         </UserProvider>
       </body>
