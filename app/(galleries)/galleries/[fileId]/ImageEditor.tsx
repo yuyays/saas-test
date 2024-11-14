@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { MediaFile } from "../GalleryList";
 import { CustomizePanel } from "./CustomizePanel";
+import { X } from "lucide-react"; // Import X icon for close button
+import { Button } from "@/components/ui/button";
 
 interface ImageEditorProps {
   media: MediaFile;
@@ -24,11 +26,23 @@ export function ImageEditor({
 }: ImageEditorProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Edit Image</DialogTitle>
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl">Edit Image</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
-        <CustomizePanel file={media} onSave={onSave} />
+        <div className="flex-1 overflow-auto p-6">
+          <CustomizePanel file={media} onSave={onSave} />
+        </div>
       </DialogContent>
     </Dialog>
   );

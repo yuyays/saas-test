@@ -127,70 +127,79 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-8">
-      <div className="space-y-4">
-        {overlays.map((overlay, index) => (
-          <div key={overlay.id} className="relative">
-            <TextOverlay
-              id={overlay.id}
-              onUpdate={(text, x, y) =>
-                handleOverlayUpdate(overlay.id, text, x, y)
+    <div className="grid grid-cols-[350px_1fr] gap-8 h-full">
+      <div className="space-y-4 overflow-y-auto">
+        {/* Controls Section */}
+        <div className="space-y-4">
+          {overlays.map((overlay, index) => (
+            <div key={overlay.id} className="relative">
+              <TextOverlay
+                id={overlay.id}
+                onUpdate={(text, x, y) =>
+                  handleOverlayUpdate(overlay.id, text, x, y)
+                }
+              />
+              {index > 0 && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -right-2 -top-2"
+                  onClick={() => handleDeleteOverlay(overlay.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-2">
+          <Button
+            onClick={handleAddOverlay}
+            variant="outline"
+            className="w-full"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Text Overlay
+          </Button>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={handleSave}
+              className="flex-1"
+              disabled={Object.keys(transformations).length === 0 || isSaving}
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+
+            <Button
+              onClick={handleDownload}
+              variant="secondary"
+              disabled={
+                Object.keys(transformations).length === 0 || isDownloading
               }
-            />
-            {index > 0 && (
-              <Button
-                variant="destructive"
-                size="icon"
-                className="absolute -right-2 -top-2"
-                onClick={() => handleDeleteOverlay(overlay.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {isDownloading ? "Downloading..." : "Download"}
+            </Button>
           </div>
-        ))}
-
-        <Button
-          onClick={handleAddOverlay}
-          variant="outline"
-          className="w-full mt-4"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Text Overlay
-        </Button>
-
-        <div className="flex gap-2">
-          <Button
-            onClick={handleSave}
-            className="flex-1"
-            disabled={Object.keys(transformations).length === 0 || isSaving}
-          >
-            {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
-
-          <Button
-            onClick={handleDownload}
-            variant="secondary"
-            disabled={
-              Object.keys(transformations).length === 0 || isDownloading
-            }
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            {isDownloading ? "Downloading..." : "Download"}
-          </Button>
         </div>
       </div>
 
-      <div className="relative aspect-video">
-        <IKImage
-          src={file.url}
-          alt={file.name}
-          width={800}
-          height={450}
-          className="rounded-md object-cover w-full h-full"
-          transformation={Object.values(transformations)}
-        />
+      {/* Preview Section */}
+      <div className="relative flex items-center justify-center bg-gray-100 rounded-lg p-4">
+        <div className="relative max-w-full max-h-full">
+          <IKImage
+            src={file.url}
+            alt={file.name}
+            width={1200}
+            height={800}
+            className="rounded-md object-contain max-h-[70vh]"
+            transformation={Object.values(transformations)}
+          />
+        </div>
       </div>
     </div>
   );
