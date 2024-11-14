@@ -14,8 +14,8 @@ A modern web application for managing and editing media files with custom text o
 
 ## Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Framework**: [Next.js 15](https://nextjs.org/)🎬 Support for Images and Videos
+- **Styling**: [Tailwind CSS](https://🎬 Support for Images and Videostailwindcss.com/)
 - **Database ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Media Processing**: [ImageKit](https://imagekit.io/)
 - **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
@@ -83,3 +83,8 @@ pnpm dev
 
 
 Let me know if you need any specific section expanded or have additional features to document!
+
+# upcoming feacture
+- [ ] rate limit
+- [ ] image collage
+- [ ] paywall for certain feacture
