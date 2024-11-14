@@ -7,8 +7,8 @@ import { Providers } from "./providers";
 import { Header } from "./(dashboard)/layout";
 import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
-  title: "Next.js SaaS Starter",
-  description: "Get started quickly with Next.js, Postgres, and Stripe.",
+  title: "Media Editor app",
+  description: "powered by ImageKit.",
 };
 
 export const viewport: Viewport = {
