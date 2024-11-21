@@ -8,16 +8,26 @@ import { useState } from "react";
 
 interface TextOverlayProps {
   id: string;
-  onUpdate: (text: string, x: number, y: number) => void;
+  onUpdate: (text: string, x: number, y: number, bgColor: string) => void;
 }
 
 export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
   const [textOverlay, setTextOverlay] = useState("");
   const [textOverlayXPosition, setTextOverlayXPosition] = useState(0);
   const [textOverlayYPosition, setTextOverlayYPosition] = useState(0);
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
 
   const xPositionDecimal = textOverlayXPosition / 100;
   const yPositionDecimal = textOverlayYPosition / 100;
+
+  const handleUpdate = (
+    text: string = textOverlay,
+    x: number = xPositionDecimal,
+    y: number = yPositionDecimal,
+    bg: string = backgroundColor
+  ) => {
+    onUpdate(text, x, y, bg);
+  };
 
   return (
     <Card className="p-4 space-y-4">
@@ -27,12 +37,49 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           id={`${id}-text`}
           onChange={(e) => {
             setTextOverlay(e.target.value);
-            onUpdate(e.target.value, xPositionDecimal, yPositionDecimal);
+            handleUpdate(e.target.value);
           }}
           value={textOverlay}
           placeholder="Enter text..."
         />
       </div>
+
+      <div>
+        <Label htmlFor={`${id}-bg`}>Background Color</Label>
+        <div className="flex gap-2">
+          <Input
+            id={`${id}-bg`}
+            type="color"
+            value={backgroundColor}
+            onChange={(e) => {
+              setBackgroundColor(e.target.value);
+              handleUpdate(
+                textOverlay,
+                xPositionDecimal,
+                yPositionDecimal,
+                e.target.value
+              );
+            }}
+            className="w-12 h-8 p-0"
+          />
+          <Input
+            type="text"
+            value={backgroundColor}
+            onChange={(e) => {
+              setBackgroundColor(e.target.value);
+              handleUpdate(
+                textOverlay,
+                xPositionDecimal,
+                yPositionDecimal,
+                e.target.value
+              );
+            }}
+            placeholder="#FFFFFF"
+            className="flex-1"
+          />
+        </div>
+      </div>
+
       <div>
         <Label htmlFor={`${id}-x`}>X Position</Label>
         <Slider
@@ -42,10 +89,11 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           value={[textOverlayXPosition]}
           onValueChange={([v]) => {
             setTextOverlayXPosition(v);
-            onUpdate(textOverlay, v / 100, yPositionDecimal);
+            handleUpdate(textOverlay, v / 100, yPositionDecimal);
           }}
         />
       </div>
+
       <div>
         <Label htmlFor={`${id}-y`}>Y Position</Label>
         <Slider
@@ -55,7 +103,7 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           value={[textOverlayYPosition]}
           onValueChange={([v]) => {
             setTextOverlayYPosition(v);
-            onUpdate(textOverlay, xPositionDecimal, v / 100);
+            handleUpdate(textOverlay, xPositionDecimal, v / 100);
           }}
         />
       </div>

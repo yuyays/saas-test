@@ -18,13 +18,14 @@ type Overlay = {
   text: string;
   x: number;
   y: number;
+  backgroundColor: string;
 };
 
 export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
   const { toast } = useToast();
 
   const [overlays, setOverlays] = useState<Overlay[]>([
-    { id: "overlay-1", text: "", x: 0, y: 0 },
+    { id: "overlay-1", text: "", x: 0, y: 0, backgroundColor: "#FFFFFF" },
   ]);
   const [transformations, setTransformations] = useState<
     Record<string, { raw: string }>
@@ -98,7 +99,10 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
 
   const handleAddOverlay = () => {
     const newId = `overlay-${overlays.length + 1}`;
-    setOverlays([...overlays, { id: newId, text: "", x: 0, y: 0 }]);
+    setOverlays([
+      ...overlays,
+      { id: newId, text: "", x: 0, y: 0, backgroundColor: "#FFFFFF" },
+    ]);
   };
 
   const handleDeleteOverlay = (overlayId: string) => {
@@ -114,18 +118,21 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     overlayId: string,
     text: string,
     x: number,
-    y: number
+    y: number,
+    backgroundColor: string
   ) => {
     setTransformations((current) => ({
       ...current,
       [overlayId]: {
         raw: `l-text,i-${text ?? " "},fs-50,ly-bw_mul_${y.toFixed(
           2
-        )},lx-bw_mul_${x.toFixed(2)},l-end`,
+        )},lx-bw_mul_${x.toFixed(2)},bg-${backgroundColor.replace(
+          "#",
+          ""
+        )},l-end`,
       },
     }));
   };
-
   return (
     <div className="grid grid-cols-[350px_1fr] gap-8 h-full">
       <div className="space-y-4 overflow-y-auto">
@@ -135,8 +142,8 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
             <div key={overlay.id} className="relative">
               <TextOverlay
                 id={overlay.id}
-                onUpdate={(text, x, y) =>
-                  handleOverlayUpdate(overlay.id, text, x, y)
+                onUpdate={(text, x, y, bgColor) =>
+                  handleOverlayUpdate(overlay.id, text, x, y, bgColor)
                 }
               />
               {index > 0 && (
