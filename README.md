@@ -15,12 +15,13 @@ A modern web application for managing and editing media files with custom text o
 ## Tech Stack
 
 - **Framework**: [Next.js 15](https://nextjs.org/)🎬 Support for Images and Videos
-- **Styling**: [Tailwind CSS](https://🎬 Support for Images and Videostailwindcss.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) 🎬 Support for Images and Videostailwindcss.com/
 - **Database ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Media Processing**: [ImageKit](https://imagekit.io/)
 - **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
 - **Authentication**: [custom auth using leerob' starter-kit](https://github.com/leerob/next-saas-starter)
 - **Database**: PostgreSQL
+- **Rate Limit** [Upstash](https://upstash.com/)
 
 ## Prerequisites
 
@@ -48,6 +49,9 @@ NEXT_PUBLIC_URL_ENDPOINT="https://ik.imagekit.io/your_imagekit_id"
 NEXT_PUBLIC_PUBLIC_KEY="your_public_key"
 PRIVATE_KEY="your_private_key"
 
+#upstash
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 ```
 
 ## Installation
