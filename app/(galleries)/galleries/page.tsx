@@ -1,18 +1,32 @@
-import GalleryList from "./GalleryList";
+import GalleryList, { MediaFile } from "./GalleryList";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { fetchMedia } from "./queries";
-import MediaUploadComponent from "./UploadMedia";
 import { EmptyGallery } from "./EmptyGallery";
+import ErrorMessage from "./ErrorMessage";
 
 export default async function GalleryPage() {
   const session = await getSession();
-  session ? { user: session.user } : null;
-
   if (!session) {
     redirect("/sign-in");
   }
-  const mediaItems = await fetchMedia(session.user.id);
+
+  let mediaItems: MediaFile[] = [];
+  let error: string | null = null;
+
+  try {
+    mediaItems = await fetchMedia(session.user.id);
+  } catch (e) {
+    if (e instanceof Error && e.message === "RATE_LIMIT_EXCEEDED") {
+      error = "Rate limit exceeded. Please try again later.";
+    } else {
+      error = "An error occurred while fetching media.";
+    }
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
 
   if (mediaItems.length === 0) {
     return <EmptyGallery />;

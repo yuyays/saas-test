@@ -4,6 +4,8 @@ import { LoadingSpinner } from "@/components/ui/spinner";
 import { getMediaById } from "../queries";
 import MediaDetails from "./MediaDetails";
 import { getSession } from "@/lib/auth/session";
+import { MediaFile } from "../GalleryList";
+import ErrorMessage from "../ErrorMessage";
 
 export default async function MediaPage({
   params,
@@ -22,7 +24,22 @@ export default async function MediaPage({
     redirect("/sign-in");
   }
 
-  const media = await getMediaById(fileId, session.user.id);
+  let media: MediaFile | null = null;
+  let error: string | null = null;
+
+  try {
+    media = await getMediaById(fileId, session.user.id);
+  } catch (e) {
+    if (e instanceof Error && e.message === "RATE_LIMIT_EXCEEDED") {
+      error = "Rate limit exceeded. Please try again later.";
+    } else {
+      error = "An error occurred while fetching media.";
+    }
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
   if (!media) {
     notFound();
   }

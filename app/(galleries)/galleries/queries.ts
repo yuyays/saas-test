@@ -7,9 +7,16 @@ import imageKit from "@/lib/iamgeKit";
 import { FileDetailsOptions } from "imagekit/dist/libs/interfaces/FileDetails";
 import { getSession } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
+import { ratelimit } from "@/lib/db/ratelimit";
 
 export async function fetchMedia(userId: number): Promise<MediaFile[]> {
   try {
+    const identifier = `fetchMedia_${userId}`;
+    const { success } = await ratelimit.limit(identifier);
+
+    if (!success) {
+      throw new Error("RATE_LIMIT_EXCEEDED");
+    }
     const userMediaItems = await db
       .select()
       .from(userMedia)
@@ -31,8 +38,13 @@ export async function fetchMedia(userId: number): Promise<MediaFile[]> {
 
     return await Promise.all(mediaPromises);
   } catch (error) {
+    if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
+      console.error("Failed due to rate limit:", error);
+
+      throw error;
+    }
     console.error("Failed to fetch media:", error);
-    return [];
+    throw new Error("Failed to fetch media");
   }
 }
 
@@ -41,6 +53,12 @@ export async function getMediaById(
   userId: number
 ): Promise<MediaFile | null> {
   try {
+    const identifier = `getMediaById_${userId}`;
+    const { success } = await ratelimit.limit(identifier);
+    if (!success) {
+      throw new Error("RATE_LIMIT_EXCEEDED");
+    }
+
     // First, check if the media belongs to the user
     const mediaItem = await db
       .select()
@@ -65,6 +83,9 @@ export async function getMediaById(
       // videoCodec: fileDetails.videoCodec,
     };
   } catch (error) {
+    if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
+      throw error;
+    }
     console.error("Failed to fetch media:", error);
     return null;
   }
@@ -193,21 +214,31 @@ export async function uploadMediaToDatabase(mediaData: {
   height: number;
   width: number;
 }) {
-  const session = await getSession();
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
+  {
+    try {
+      const session = await getSession();
+      if (!session?.user) {
+        throw new Error("Unauthorized");
+      }
 
-  try {
-    await db.insert(userMedia).values({
-      userId: session.user.id,
-      ...mediaData,
-    });
+      const identifier = `uploadMedia_${session.user.id}`;
+      const { success } = await ratelimit.limit(identifier);
+      if (!success) {
+        throw new Error("RATE_LIMIT_EXCEEDED");
+      }
 
-    revalidatePath("/galleries");
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to save media:", error);
-    throw error;
+      await db.insert(userMedia).values({
+        userId: session.user.id,
+        ...mediaData,
+      });
+
+      revalidatePath("/galleries");
+      return { success: true };
+    } catch (error) {
+      if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
+        throw error;
+      }
+      console.error("Failed to save media:", error);
+    }
   }
 }

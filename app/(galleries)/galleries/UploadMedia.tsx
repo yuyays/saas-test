@@ -7,11 +7,12 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { uploadMediaToDatabase } from "./queries";
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+import ErrorMessage from "./ErrorMessage";
 
 export default function MediaUploadComponent() {
   const [uploading, setUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const onError = (err: any) => {
@@ -23,7 +24,7 @@ export default function MediaUploadComponent() {
   };
 
   const onSuccess = async (res: any) => {
-    console.log("Upload Success:", res);
+    setError(null); // Clear any previous errors
     setUploading(false);
 
     try {
@@ -41,12 +42,21 @@ export default function MediaUploadComponent() {
       });
       setIsOpen(false);
     } catch (error) {
-      console.error("Error saving media to database:", error);
+      let errorMessage = "An error occurred while saving media.";
+
+      if (error instanceof Error) {
+        if (error.message === "RATE_LIMIT_EXCEEDED") {
+          errorMessage = "Rate limit exceeded. Please try again later.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      setError(errorMessage);
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your upload.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
+        title: "Error",
+        description: errorMessage,
       });
     }
   };
@@ -69,7 +79,7 @@ export default function MediaUploadComponent() {
                 <LoadingSpinner />
               </div>
             )}
-
+            {error && <ErrorMessage message={error} />}
             <IKUpload
               fileName="test-upload.png"
               onError={onError}
