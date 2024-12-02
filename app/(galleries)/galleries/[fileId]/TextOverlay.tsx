@@ -26,7 +26,8 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
     y: number = yPositionDecimal,
     bg: string = backgroundColor
   ) => {
-    onUpdate(text, x, y, bg);
+    const safeText = text.trim() === "" ? " " : text;
+    onUpdate(safeText, x, y, bg);
   };
 
   return (
