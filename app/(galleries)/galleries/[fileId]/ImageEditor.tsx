@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { MediaFile } from "../GalleryList";
 import { CustomizePanel } from "./CustomizePanel";
-import { X } from "lucide-react"; // Import X icon for close button
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ImageEditorProps {

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export const LandingPage: React.FC = () => {
   return (
     <div className="overflow-x-hidden bg-gradient-to-b from-gray-50 to-white">
@@ -129,10 +131,13 @@ export const LandingPage: React.FC = () => {
           <div className="relative mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  className="w-full"
-                  src="/preview-editor.png" // Add your product screenshot here
+                <Image
+                  className="w-full h-auto object-cover"
+                  src="https://ik.imagekit.io/gus5alhna/Screenshot%20from%202024-12-13%2019-32-03.png?updatedAt=1734085950335"
                   alt="Media Editor Preview"
+                  width={1200}
+                  height={675}
+                  priority
                 />
                 {/* Optional: Add a gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>

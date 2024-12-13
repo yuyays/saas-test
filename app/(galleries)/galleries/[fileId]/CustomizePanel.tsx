@@ -4,7 +4,7 @@ import { useState } from "react";
 import { IKImage } from "imagekitio-next";
 import { Button } from "@/components/ui/button";
 import { TextOverlay } from "./TextOverlay";
-import { Plus, Trash2, Download } from "lucide-react";
+import { Plus, Trash2, Download, Check, Copy } from "lucide-react";
 import { MediaFile } from "../GalleryList";
 import { useToast } from "@/hooks/use-toast";
 
@@ -133,6 +133,46 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
       },
     }));
   };
+
+  const [isCopied, setIsCopied] = useState(false);
+
+  const getTransformedUrl = () => {
+    const transformationArray = Object.values(transformations);
+    if (transformationArray.length === 0) return null;
+
+    const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT;
+    const transformString = transformationArray.map((t) => t.raw).join(",");
+    return `${urlEndpoint}/tr:${transformString}/${file.name}`;
+  };
+
+  const handleCopyUrl = async () => {
+    const transformedUrl = getTransformedUrl();
+    if (!transformedUrl) {
+      toast({
+        description: "No transformations to copy",
+      });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(transformedUrl);
+      setIsCopied(true);
+      toast({
+        description: "URL copied to clipboard",
+      });
+
+      // Reset copy state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy URL",
+      });
+    }
+  };
+
   return (
     <div className="grid grid-cols-[350px_1fr] gap-8 h-full">
       <div className="space-y-4 overflow-y-auto">
@@ -173,11 +213,21 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
 
           <div className="flex gap-2">
             <Button
-              onClick={handleSave}
-              className="flex-1"
-              disabled={Object.keys(transformations).length === 0 || isSaving}
+              onClick={handleCopyUrl}
+              className="flex-1 gap-2"
+              disabled={Object.keys(transformations).length === 0}
             >
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isCopied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy URL
+                </>
+              )}
             </Button>
 
             <Button
