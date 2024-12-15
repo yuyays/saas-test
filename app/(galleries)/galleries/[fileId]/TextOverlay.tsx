@@ -4,11 +4,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
+
+const AVAILABLE_FONTS = [
+  { name: "AbrilFatFace", hasItalic: false, hasBold: false },
+  { name: "Amaranth", hasItalic: true, hasBold: true },
+  { name: "Arvo", hasItalic: true, hasBold: true },
+  { name: "Audiowide", hasItalic: false, hasBold: false },
+  { name: "Montserrat", hasItalic: true, hasBold: true },
+  { name: "Open Sans", hasItalic: true, hasBold: true },
+  { name: "Roboto", hasItalic: true, hasBold: true },
+  { name: "Ubuntu", hasItalic: true, hasBold: true },
+] as const;
 
 interface TextOverlayProps {
   id: string;
-  onUpdate: (text: string, x: number, y: number, bgColor: string) => void;
+  onUpdate: (
+    text: string,
+    x: number,
+    y: number,
+    bgColor: string,
+    font: string
+  ) => void;
 }
 
 export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
@@ -16,7 +40,7 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
   const [textOverlayXPosition, setTextOverlayXPosition] = useState(0);
   const [textOverlayYPosition, setTextOverlayYPosition] = useState(0);
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
-
+  const [selectedFont, setSelectedFont] = useState("Roboto");
   const xPositionDecimal = textOverlayXPosition / 100;
   const yPositionDecimal = textOverlayYPosition / 100;
 
@@ -24,10 +48,11 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
     text: string = textOverlay,
     x: number = xPositionDecimal,
     y: number = yPositionDecimal,
-    bg: string = backgroundColor
+    bg: string = backgroundColor,
+    font: string = selectedFont
   ) => {
     const safeText = text.trim() === "" ? " " : text;
-    onUpdate(safeText, x, y, bg);
+    onUpdate(safeText, x, y, bg, font);
   };
 
   return (
@@ -44,7 +69,37 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           placeholder="Enter text..."
         />
       </div>
-
+      <div>
+        <Label htmlFor={`${id}-font`}>Font Family</Label>
+        <Select
+          value={selectedFont}
+          onValueChange={(value) => {
+            setSelectedFont(value);
+            handleUpdate(
+              textOverlay,
+              xPositionDecimal,
+              yPositionDecimal,
+              backgroundColor,
+              value
+            );
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select font" />
+          </SelectTrigger>
+          <SelectContent>
+            {AVAILABLE_FONTS.map((font) => (
+              <SelectItem
+                key={font.name}
+                value={font.name}
+                style={{ fontFamily: font.name }}
+              >
+                {font.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div>
         <Label htmlFor={`${id}-bg`}>Background Color</Label>
         <div className="flex gap-2">
