@@ -120,12 +120,15 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     x: number,
     y: number,
     backgroundColor: string,
-    font: string
+    font: string,
+    fontSize: number
   ) => {
     setTransformations((current) => ({
       ...current,
       [overlayId]: {
-        raw: `l-text,i-${text ?? " "},ff-${font},fs-50,ly-bw_mul_${y.toFixed(
+        raw: `l-text,i-${
+          text ?? " "
+        },ff-${font},fs-${fontSize},ly-bw_mul_${y.toFixed(
           2
         )},lx-bw_mul_${x.toFixed(2)},bg-${backgroundColor.replace(
           "#",
@@ -183,8 +186,16 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
             <div key={overlay.id} className="relative">
               <TextOverlay
                 id={overlay.id}
-                onUpdate={(text, x, y, bgColor, font) =>
-                  handleOverlayUpdate(overlay.id, text, x, y, bgColor, font)
+                onUpdate={(text, x, y, bgColor, font, fontsize) =>
+                  handleOverlayUpdate(
+                    overlay.id,
+                    text,
+                    x,
+                    y,
+                    bgColor,
+                    font,
+                    fontsize
+                  )
                 }
               />
               {index > 0 && (

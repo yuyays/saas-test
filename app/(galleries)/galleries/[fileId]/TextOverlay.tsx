@@ -31,7 +31,8 @@ interface TextOverlayProps {
     x: number,
     y: number,
     bgColor: string,
-    font: string
+    font: string,
+    fontSize: number
   ) => void;
 }
 
@@ -41,6 +42,7 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
   const [textOverlayYPosition, setTextOverlayYPosition] = useState(0);
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [selectedFont, setSelectedFont] = useState("Roboto");
+  const [fontSize, setFontSize] = useState(50);
   const xPositionDecimal = textOverlayXPosition / 100;
   const yPositionDecimal = textOverlayYPosition / 100;
 
@@ -49,10 +51,11 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
     x: number = xPositionDecimal,
     y: number = yPositionDecimal,
     bg: string = backgroundColor,
-    font: string = selectedFont
+    font: string = selectedFont,
+    size: number = fontSize
   ) => {
     const safeText = text.trim() === "" ? " " : text;
-    onUpdate(safeText, x, y, bg, font);
+    onUpdate(safeText, x, y, bg, font, size);
   };
 
   return (
@@ -100,6 +103,33 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           </SelectContent>
         </Select>
       </div>
+
+      <div>
+        <Label htmlFor={`${id}-font-size`}>Font Size</Label>
+        <div className="flex items-center gap-4">
+          <Slider
+            id={`${id}-font-size`}
+            min={10}
+            max={500}
+            step={1}
+            value={[fontSize]}
+            onValueChange={([value]) => {
+              setFontSize(value);
+              handleUpdate(
+                textOverlay,
+                xPositionDecimal,
+                yPositionDecimal,
+                backgroundColor,
+                selectedFont,
+                value
+              );
+            }}
+            className="flex-grow"
+          />
+          <span className="text-sm font-medium">{fontSize}px</span>
+        </div>
+      </div>
+
       <div>
         <Label htmlFor={`${id}-bg`}>Background Color</Label>
         <div className="flex gap-2">
