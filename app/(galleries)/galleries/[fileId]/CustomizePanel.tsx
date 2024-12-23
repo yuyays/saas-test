@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IKImage } from "imagekitio-next";
 import { Button } from "@/components/ui/button";
 import { TextOverlay } from "./TextOverlay";
@@ -21,8 +21,22 @@ type Overlay = {
   backgroundColor: string;
 };
 
+type ImageEffects = {
+  contrast: boolean;
+  sharpness: number;
+  grayscale: boolean;
+  blur: number;
+};
+
 export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
   const { toast } = useToast();
+
+  const [effects, setEffects] = useState<ImageEffects>({
+    contrast: false,
+    sharpness: 0,
+    grayscale: false,
+    blur: 0,
+  });
 
   const [overlays, setOverlays] = useState<Overlay[]>([
     { id: "overlay-1", text: "", x: 0, y: 0, backgroundColor: "#FFFFFF" },
@@ -32,6 +46,15 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
   >({});
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = file.url;
+    img.onload = () => {
+      setImageSize({ width: img.width, height: img.height });
+    };
+  }, [file.url]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -114,6 +137,48 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     setTransformations(newTransformations);
   };
 
+  const updateEffects = (
+    effect: keyof ImageEffects,
+    value: number | boolean
+  ) => {
+    const newEffects = { ...effects, [effect]: value };
+    setEffects(newEffects);
+
+    // Update transformations based on effects while preserving existing transformations
+    const newTransformations = { ...transformations };
+
+    // Handle effects
+    if (newEffects.contrast) {
+      newTransformations.contrast = { raw: "e-contrast" };
+    } else {
+      delete newTransformations.contrast;
+    }
+
+    if (newEffects.sharpness !== 0) {
+      newTransformations.sharpness = {
+        raw: `e-sharpen${newEffects.sharpness > 0 ? "" : "-soft"}-${Math.abs(
+          newEffects.sharpness
+        )}`,
+      };
+    } else {
+      delete newTransformations.sharpness;
+    }
+
+    if (newEffects.grayscale) {
+      newTransformations.grayscale = { raw: "e-grayscale" };
+    } else {
+      delete newTransformations.grayscale;
+    }
+
+    if (newEffects.blur > 0) {
+      newTransformations.blur = { raw: `bl-${newEffects.blur}` };
+    } else {
+      delete newTransformations.blur;
+    }
+
+    setTransformations(newTransformations);
+  };
+
   const handleOverlayUpdate = (
     overlayId: string,
     text: string,
@@ -123,19 +188,26 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     font: string,
     fontSize: number
   ) => {
-    setTransformations((current) => ({
-      ...current,
-      [overlayId]: {
-        raw: `l-text,i-${
-          text ?? " "
-        },ff-${font},fs-${fontSize},ly-bw_mul_${y.toFixed(
-          2
-        )},lx-bw_mul_${x.toFixed(2)},bg-${backgroundColor.replace(
-          "#",
-          ""
-        )},l-end`,
-      },
-    }));
+    setOverlays((prev) =>
+      prev.map((overlay) =>
+        overlay.id === overlayId
+          ? { ...overlay, text, x, y, backgroundColor }
+          : overlay
+      )
+    );
+
+    // Update transformations while preserving effects
+    const newTransformations = { ...transformations };
+
+    // Use absolute pixel positions directly
+    newTransformations[overlayId] = {
+      raw: `l-text,i-${text || "_"},ff-${font},fs-${fontSize},ly-${y},lx-${x},bg-${backgroundColor.replace(
+        "#",
+        ""
+      )},l-end`,
+    };
+
+    setTransformations(newTransformations);
   };
 
   const [isCopied, setIsCopied] = useState(false);
@@ -186,6 +258,7 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
             <div key={overlay.id} className="relative">
               <TextOverlay
                 id={overlay.id}
+                imageSize={imageSize}
                 onUpdate={(text, x, y, bgColor, font, fontsize) =>
                   handleOverlayUpdate(
                     overlay.id,
@@ -210,6 +283,61 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Image Effects */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={effects.contrast}
+              onChange={(e) => updateEffects("contrast", e.target.checked)}
+              id="contrast"
+            />
+            <label htmlFor="contrast" className="text-sm font-medium">
+              Contrast
+            </label>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Sharpness ({effects.sharpness})
+            </label>
+            <input
+              type="range"
+              min="-100"
+              max="100"
+              value={effects.sharpness}
+              onChange={(e) =>
+                updateEffects("sharpness", parseInt(e.target.value))
+              }
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Blur ({effects.blur})</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={effects.blur}
+              onChange={(e) => updateEffects("blur", parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={effects.grayscale}
+              onChange={(e) => updateEffects("grayscale", e.target.checked)}
+              id="grayscale"
+            />
+            <label htmlFor="grayscale" className="text-sm font-medium">
+              Grayscale
+            </label>
+          </div>
         </div>
 
         {/* Action Buttons */}

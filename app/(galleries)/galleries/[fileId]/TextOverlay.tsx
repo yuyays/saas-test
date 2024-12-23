@@ -26,6 +26,7 @@ const AVAILABLE_FONTS = [
 
 interface TextOverlayProps {
   id: string;
+  imageSize: { width: number; height: number } | null;
   onUpdate: (
     text: string,
     x: number,
@@ -36,20 +37,29 @@ interface TextOverlayProps {
   ) => void;
 }
 
-export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
+export function TextOverlay({ id, imageSize, onUpdate }: TextOverlayProps) {
   const [textOverlay, setTextOverlay] = useState("");
   const [textOverlayXPosition, setTextOverlayXPosition] = useState(0);
   const [textOverlayYPosition, setTextOverlayYPosition] = useState(0);
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [selectedFont, setSelectedFont] = useState("Roboto");
   const [fontSize, setFontSize] = useState(50);
-  const xPositionDecimal = textOverlayXPosition / 100;
-  const yPositionDecimal = textOverlayYPosition / 100;
+
+  // Add offset to ensure text is visible at 0,0
+  const OFFSET = 10; // 10 pixels offset from edges
+
+  // Convert slider values (0-100) to actual pixel positions with offset
+  const xPixelPosition = imageSize
+    ? Math.round((textOverlayXPosition / 100) * (imageSize.width - OFFSET * 2)) + OFFSET
+    : OFFSET;
+  const yPixelPosition = imageSize
+    ? Math.round((textOverlayYPosition / 100) * (imageSize.height - OFFSET * 2)) + OFFSET
+    : OFFSET;
 
   const handleUpdate = (
     text: string = textOverlay,
-    x: number = xPositionDecimal,
-    y: number = yPositionDecimal,
+    x: number = xPixelPosition,
+    y: number = yPixelPosition,
     bg: string = backgroundColor,
     font: string = selectedFont,
     size: number = fontSize
@@ -80,8 +90,8 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
             setSelectedFont(value);
             handleUpdate(
               textOverlay,
-              xPositionDecimal,
-              yPositionDecimal,
+              xPixelPosition,
+              yPixelPosition,
               backgroundColor,
               value
             );
@@ -117,8 +127,8 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
               setFontSize(value);
               handleUpdate(
                 textOverlay,
-                xPositionDecimal,
-                yPositionDecimal,
+                xPixelPosition,
+                yPixelPosition,
                 backgroundColor,
                 selectedFont,
                 value
@@ -141,8 +151,8 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
               setBackgroundColor(e.target.value);
               handleUpdate(
                 textOverlay,
-                xPositionDecimal,
-                yPositionDecimal,
+                xPixelPosition,
+                yPixelPosition,
                 e.target.value
               );
             }}
@@ -155,8 +165,8 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
               setBackgroundColor(e.target.value);
               handleUpdate(
                 textOverlay,
-                xPositionDecimal,
-                yPositionDecimal,
+                xPixelPosition,
+                yPixelPosition,
                 e.target.value
               );
             }}
@@ -167,7 +177,9 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
       </div>
 
       <div>
-        <Label htmlFor={`${id}-x`}>X Position</Label>
+        <Label htmlFor={`${id}-x`}>
+          X Position ({xPixelPosition}px / {imageSize?.width ?? '...'})
+        </Label>
         <Slider
           id={`${id}-x`}
           min={0}
@@ -175,13 +187,18 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           value={[textOverlayXPosition]}
           onValueChange={([v]) => {
             setTextOverlayXPosition(v);
-            handleUpdate(textOverlay, v / 100, yPositionDecimal);
+            const newXPixel = imageSize
+              ? Math.round((v / 100) * (imageSize.width - OFFSET * 2)) + OFFSET
+              : OFFSET;
+            handleUpdate(textOverlay, newXPixel, yPixelPosition);
           }}
         />
       </div>
 
       <div>
-        <Label htmlFor={`${id}-y`}>Y Position</Label>
+        <Label htmlFor={`${id}-y`}>
+          Y Position ({yPixelPosition}px / {imageSize?.height ?? '...'})
+        </Label>
         <Slider
           id={`${id}-y`}
           min={0}
@@ -189,7 +206,10 @@ export function TextOverlay({ id, onUpdate }: TextOverlayProps) {
           value={[textOverlayYPosition]}
           onValueChange={([v]) => {
             setTextOverlayYPosition(v);
-            handleUpdate(textOverlay, xPositionDecimal, v / 100);
+            const newYPixel = imageSize
+              ? Math.round((v / 100) * (imageSize.height - OFFSET * 2)) + OFFSET
+              : OFFSET;
+            handleUpdate(textOverlay, xPixelPosition, newYPixel);
           }}
         />
       </div>
