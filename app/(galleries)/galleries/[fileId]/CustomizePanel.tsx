@@ -26,6 +26,7 @@ type ImageEffects = {
   sharpness: number;
   grayscale: boolean;
   blur: number;
+  cropKeyword: string;
 };
 
 export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
@@ -36,6 +37,7 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     sharpness: 0,
     grayscale: false,
     blur: 0,
+    cropKeyword: "",
   });
 
   const [overlays, setOverlays] = useState<Overlay[]>([
@@ -137,46 +139,63 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     setTransformations(newTransformations);
   };
 
-  const updateEffects = (
+  const handleEffectChange = (
     effect: keyof ImageEffects,
-    value: number | boolean
+    value: string | number | boolean
   ) => {
-    const newEffects = { ...effects, [effect]: value };
-    setEffects(newEffects);
-
-    // Update transformations based on effects while preserving existing transformations
-    const newTransformations = { ...transformations };
-
-    // Handle effects
-    if (newEffects.contrast) {
-      newTransformations.contrast = { raw: "e-contrast" };
+    setEffects((prev) => ({ ...prev, [effect]: value }));
+    
+    if (effect === "cropKeyword") {
+      if (typeof value === "string" && value.trim()) {
+        setTransformations((prev) => ({
+          ...prev,
+          crop: {
+            raw: `fo-${value.trim()}`,
+          },
+        }));
+      } else {
+        // Remove crop transformation if keyword is empty
+        const { crop, ...rest } = transformations;
+        setTransformations(rest);
+      }
     } else {
-      delete newTransformations.contrast;
-    }
+      const newEffects = { ...effects, [effect]: value };
+      setEffects(newEffects);
 
-    if (newEffects.sharpness !== 0) {
-      newTransformations.sharpness = {
-        raw: `e-sharpen${newEffects.sharpness > 0 ? "" : "-soft"}-${Math.abs(
-          newEffects.sharpness
-        )}`,
-      };
-    } else {
-      delete newTransformations.sharpness;
-    }
+      // Update transformations based on effects while preserving existing transformations
+      const newTransformations = { ...transformations };
 
-    if (newEffects.grayscale) {
-      newTransformations.grayscale = { raw: "e-grayscale" };
-    } else {
-      delete newTransformations.grayscale;
-    }
+      // Handle effects
+      if (newEffects.contrast) {
+        newTransformations.contrast = { raw: "e-contrast" };
+      } else {
+        delete newTransformations.contrast;
+      }
 
-    if (newEffects.blur > 0) {
-      newTransformations.blur = { raw: `bl-${newEffects.blur}` };
-    } else {
-      delete newTransformations.blur;
-    }
+      if (newEffects.sharpness !== 0) {
+        newTransformations.sharpness = {
+          raw: `e-sharpen${newEffects.sharpness > 0 ? "" : "-soft"}-${Math.abs(
+            newEffects.sharpness
+          )}`,
+        };
+      } else {
+        delete newTransformations.sharpness;
+      }
 
-    setTransformations(newTransformations);
+      if (newEffects.grayscale) {
+        newTransformations.grayscale = { raw: "e-grayscale" };
+      } else {
+        delete newTransformations.grayscale;
+      }
+
+      if (newEffects.blur > 0) {
+        newTransformations.blur = { raw: `bl-${newEffects.blur}` };
+      } else {
+        delete newTransformations.blur;
+      }
+
+      setTransformations(newTransformations);
+    }
   };
 
   const handleOverlayUpdate = (
@@ -291,7 +310,7 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
             <input
               type="checkbox"
               checked={effects.contrast}
-              onChange={(e) => updateEffects("contrast", e.target.checked)}
+              onChange={(e) => handleEffectChange("contrast", e.target.checked)}
               id="contrast"
             />
             <label htmlFor="contrast" className="text-sm font-medium">
@@ -309,7 +328,7 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
               max="100"
               value={effects.sharpness}
               onChange={(e) =>
-                updateEffects("sharpness", parseInt(e.target.value))
+                handleEffectChange("sharpness", parseInt(e.target.value))
               }
               className="w-full"
             />
@@ -322,7 +341,7 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
               min="0"
               max="100"
               value={effects.blur}
-              onChange={(e) => updateEffects("blur", parseInt(e.target.value))}
+              onChange={(e) => handleEffectChange("blur", parseInt(e.target.value))}
               className="w-full"
             />
           </div>
@@ -331,12 +350,27 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
             <input
               type="checkbox"
               checked={effects.grayscale}
-              onChange={(e) => updateEffects("grayscale", e.target.checked)}
+              onChange={(e) => handleEffectChange("grayscale", e.target.checked)}
               id="grayscale"
             />
             <label htmlFor="grayscale" className="text-sm font-medium">
               Grayscale
             </label>
+          </div>
+
+          {/* Object-aware Cropping */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Object-aware Cropping</label>
+            <input
+              placeholder="Enter object keyword (e.g., face, person, car)"
+              value={effects.cropKeyword}
+              onChange={(e) =>
+                handleEffectChange("cropKeyword", e.target.value)
+              }
+            />
+            <p className="text-sm text-muted-foreground">
+              Enter a keyword to crop the image focusing on that object
+            </p>
           </div>
         </div>
 
