@@ -20,23 +20,35 @@ export async function fetchMedia(userId: number): Promise<MediaFile[]> {
     const userMediaItems = await db
       .select()
       .from(userMedia)
-      .where(eq(userMedia.userId, userId));
+      .where(and(
+        eq(userMedia.userId, userId),
+        eq(userMedia.status, "active")
+      ));
 
     const mediaPromises = userMediaItems.map(async (item) => {
-      const fileDetails = await imageKit.getFileDetails(item.fileId);
-      return {
-        fileId: fileDetails.fileId,
-        name: fileDetails.name,
-        url: fileDetails.url,
-        fileType: fileDetails.fileType,
-        height: fileDetails.height,
-        width: fileDetails.width,
-        // audioCodec: fileDetails.audioCodec,
-        // videoCodec: fileDetails.videoCodec,
-      };
+      try {
+        const fileDetails = await imageKit.getFileDetails(item.fileId);
+        return {
+          fileId: fileDetails.fileId,
+          name: fileDetails.name,
+          url: fileDetails.url,
+          fileType: fileDetails.fileType,
+          height: fileDetails.height,
+          width: fileDetails.width,
+        } as MediaFile;
+      } catch (error) {
+        // If file not found in ImageKit, mark it as deleted in our database
+        if (error instanceof Error && error.message.includes("does not exist")) {
+          await markMediaAsDeleted(item.fileId);
+        }
+        // Skip this media item
+        return null;
+      }
     });
 
-    return await Promise.all(mediaPromises);
+    const results = await Promise.all(mediaPromises);
+    // Filter out null results (deleted media)
+    return results.filter((item): item is MediaFile => item !== null);
   } catch (error) {
     if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
       console.error("Failed due to rate limit:", error);
@@ -45,6 +57,17 @@ export async function fetchMedia(userId: number): Promise<MediaFile[]> {
     }
     console.error("Failed to fetch media:", error);
     throw new Error("Failed to fetch media");
+  }
+}
+
+async function markMediaAsDeleted(fileId: string) {
+  try {
+    await db
+      .update(userMedia)
+      .set({ status: "deleted" })
+      .where(eq(userMedia.fileId, fileId));
+  } catch (error) {
+    console.error("Failed to mark media as deleted:", error);
   }
 }
 
@@ -59,29 +82,37 @@ export async function getMediaById(
       throw new Error("RATE_LIMIT_EXCEEDED");
     }
 
-    // First, check if the media belongs to the user
+    // First, check if the media belongs to the user and is active
     const mediaItem = await db
       .select()
       .from(userMedia)
-      .where(and(eq(userMedia.fileId, fileId), eq(userMedia.userId, userId)))
+      .where(and(
+        eq(userMedia.fileId, fileId),
+        eq(userMedia.userId, userId),
+        eq(userMedia.status, "active")
+      ))
       .limit(1);
 
     if (!mediaItem || mediaItem.length === 0) {
       return null;
     }
 
-    const fileDetails = await imageKit.getFileDetails(fileId);
-
-    return {
-      fileId: fileDetails.fileId,
-      name: fileDetails.name,
-      url: fileDetails.url,
-      fileType: fileDetails.fileType,
-      height: fileDetails.height,
-      width: fileDetails.width,
-      // audioCodec: fileDetails.audioCodec,
-      // videoCodec: fileDetails.videoCodec,
-    };
+    try {
+      const fileDetails = await imageKit.getFileDetails(fileId);
+      return {
+        fileId: fileDetails.fileId,
+        name: fileDetails.name,
+        url: fileDetails.url,
+        fileType: fileDetails.fileType,
+        height: fileDetails.height,
+        width: fileDetails.width,
+      } as MediaFile;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("does not exist")) {
+        await markMediaAsDeleted(fileId);
+      }
+      return null;
+    }
   } catch (error) {
     if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
       throw error;
@@ -106,7 +137,8 @@ export async function deleteMedia(fileId: string, userId: number) {
 
     // Delete from database
     await db
-      .delete(userMedia)
+      .update(userMedia)
+      .set({ status: "deleted" })
       .where(and(eq(userMedia.fileId, fileId), eq(userMedia.userId, userId)));
 
     // Delete from ImageKit
@@ -118,6 +150,7 @@ export async function deleteMedia(fileId: string, userId: number) {
     throw error;
   }
 }
+
 // update some of the object filed in media(just name for now)
 export async function updateMedia(
   fileId: string,
@@ -230,6 +263,7 @@ export async function uploadMediaToDatabase(mediaData: {
       await db.insert(userMedia).values({
         userId: session.user.id,
         ...mediaData,
+        status: "active",
       });
 
       revalidatePath("/galleries");

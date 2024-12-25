@@ -11,6 +11,7 @@ export type MediaFile = {
   fileType: string;
   height: number;
   width: number;
+  status?: "active" | "deleted";
   audioCodec?: string;
   videoCodec?: string;
   filePath?: string;
