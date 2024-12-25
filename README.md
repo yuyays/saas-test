@@ -1,5 +1,6 @@
 # Media Gallery & Editor
 
+#### 日本語での説明は下にあります。
 A modern web application for managing and editing media files with custom text overlays. Built with Next.js 15, Tailwind CSS, Drizzle ORM, and ImageKit.
 
 ## Features
