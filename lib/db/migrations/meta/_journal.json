@@ -15,6 +15,13 @@
       "when": 1730902510077,
       "tag": "0001_absurd_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1735050456109,
+      "tag": "0002_cute_mastermind",
+      "breakpoints": true
     }
   ]
 }

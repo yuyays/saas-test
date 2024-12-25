@@ -79,7 +79,8 @@ export const userMedia = pgTable("user_media", {
   fileType: varchar("file_type", { length: 50 }).notNull(),
   height: integer("height"),
   width: integer("width"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: varchar("status", { length: 20 }).default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({
