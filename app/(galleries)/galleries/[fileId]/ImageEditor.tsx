@@ -6,16 +6,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MediaFile } from "../GalleryList";
-import { CustomizePanel } from "./CustomizePanel";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Team } from "@/lib/db/schema";
+
+import { MediaFile } from "../GalleryList";
+import { CustomizePanel } from "./CustomizePanel";
 
 interface ImageEditorProps {
   media: MediaFile;
   isOpen: boolean;
   onClose: () => void;
   onSave: (transformations: Array<{ raw: string }>) => Promise<void>;
+  team: Team | null;
 }
 
 export function ImageEditor({
@@ -23,6 +26,7 @@ export function ImageEditor({
   isOpen,
   onClose,
   onSave,
+  team: currentTeam,
 }: ImageEditorProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -41,7 +45,7 @@ export function ImageEditor({
           </div>
         </DialogHeader>
         <div className="flex-1 overflow-auto p-6">
-          <CustomizePanel file={media} onSave={onSave} />
+          <CustomizePanel file={media} onSave={onSave} team={currentTeam} />
         </div>
       </DialogContent>
     </Dialog>

@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { GalleryMedia } from "../GalleryMedia";
-import { ArrowLeft, Edit2, Save, Trash2 } from "lucide-react";
+import { Team } from "@/lib/db/schema";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Edit2, Save, Trash2 } from "lucide-react";
+
+import { GalleryMedia } from "../GalleryMedia";
 import { MediaFile } from "../GalleryList";
 import { deleteMedia, saveEditedImage, updateMedia } from "../queries";
 import { ImageEditor } from "./ImageEditor";
@@ -13,9 +15,14 @@ import { ImageEditor } from "./ImageEditor";
 type MediaDetailsProps = {
   media: MediaFile;
   userId: number;
+  team: Team | null;
 };
 
-export default function MediaDetails({ media, userId }: MediaDetailsProps) {
+export default function MediaDetails({
+  media,
+  userId,
+  team: currentTeam,
+}: MediaDetailsProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isImageEditing, setIsImageEditing] = useState(false);
@@ -114,6 +121,7 @@ export default function MediaDetails({ media, userId }: MediaDetailsProps) {
           isOpen={isImageEditing}
           onClose={() => setIsImageEditing(false)}
           onSave={handleImageEdit}
+          team={currentTeam}
         />
       )}
 

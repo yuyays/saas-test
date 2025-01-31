@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { IKImage } from "imagekitio-next";
-import { Button } from "@/components/ui/button";
-import { TextOverlay } from "./TextOverlay";
 import { Plus, Trash2, Download, Check, Copy } from "lucide-react";
-import { MediaFile } from "../GalleryList";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Team } from "@/lib/db/schema";
+
+import { TextOverlay } from "./TextOverlay";
+import { MediaFile } from "../GalleryList";
 
 interface CustomizePanelProps {
   file: MediaFile;
   onSave: (transformations: Array<{ raw: string }>) => Promise<void>;
+  team: Team | null;
 }
 
 type Overlay = {
@@ -29,7 +32,10 @@ type ImageEffects = {
   cropKeyword: string;
 };
 
-export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
+export function CustomizePanel({ file, onSave, team }: CustomizePanelProps) {
+  const isSubscribed =
+    team?.subscriptionStatus === "active" ||
+    team?.subscriptionStatus === "trialing";
   const { toast } = useToast();
 
   const [effects, setEffects] = useState<ImageEffects>({
@@ -48,7 +54,10 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
   >({});
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+  const [imageSize, setImageSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
     const img = new Image();
@@ -143,8 +152,16 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
     effect: keyof ImageEffects,
     value: string | number | boolean
   ) => {
+    if (effect === "blur" && !isSubscribed) {
+      toast({
+        variant: "destructive",
+        description: "Blur effect requires an active subscription",
+      });
+      return;
+    }
+
     setEffects((prev) => ({ ...prev, [effect]: value }));
-    
+
     if (effect === "cropKeyword") {
       if (typeof value === "string" && value.trim()) {
         setTransformations((prev) => ({
@@ -187,8 +204,7 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
       } else {
         delete newTransformations.grayscale;
       }
-
-      if (newEffects.blur > 0) {
+      if (newEffects.blur > 0 && isSubscribed) {
         newTransformations.blur = { raw: `bl-${newEffects.blur}` };
       } else {
         delete newTransformations.blur;
@@ -220,7 +236,9 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
 
     // Use absolute pixel positions directly
     newTransformations[overlayId] = {
-      raw: `l-text,i-${text || "_"},ff-${font},fs-${fontSize},ly-${y},lx-${x},bg-${backgroundColor.replace(
+      raw: `l-text,i-${
+        text || "_"
+      },ff-${font},fs-${fontSize},ly-${y},lx-${x},bg-${backgroundColor.replace(
         "#",
         ""
       )},l-end`,
@@ -341,16 +359,26 @@ export function CustomizePanel({ file, onSave }: CustomizePanelProps) {
               min="0"
               max="100"
               value={effects.blur}
-              onChange={(e) => handleEffectChange("blur", parseInt(e.target.value))}
+              onChange={(e) =>
+                handleEffectChange("blur", parseInt(e.target.value))
+              }
               className="w-full"
+              disabled={!isSubscribed}
             />
+            {!isSubscribed && (
+              <p className="text-sm text-red-500">
+                Blur effect requires an active subscription
+              </p>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
               checked={effects.grayscale}
-              onChange={(e) => handleEffectChange("grayscale", e.target.checked)}
+              onChange={(e) =>
+                handleEffectChange("grayscale", e.target.checked)
+              }
               id="grayscale"
             />
             <label htmlFor="grayscale" className="text-sm font-medium">
