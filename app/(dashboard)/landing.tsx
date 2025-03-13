@@ -24,11 +24,11 @@ export const LandingPage: React.FC = () => {
 
             <div className="px-8 sm:items-center sm:justify-center sm:px-0 sm:space-x-5 sm:flex mt-9">
               <a
-                href="/sign-up"
+                href="/edit"
                 className="inline-flex items-center justify-center w-full px-8 py-3 text-lg font-bold text-white transition-all duration-200 bg-blue-600 border-2 border-transparent sm:w-auto rounded-xl font-pj hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
                 role="button"
               >
-                Start Creating
+                Start Editing
               </a>
               <a
                 href="/galleries"
