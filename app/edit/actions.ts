@@ -80,8 +80,6 @@ export async function uploadAnonymousImage(
 
 // Add a cleanup function for temporary files
 export async function cleanupTemporaryFiles() {
-  "use server";
-
   const oneDayAgo = new Date();
   oneDayAgo.setDate(oneDayAgo.getDate() - 1);
 
