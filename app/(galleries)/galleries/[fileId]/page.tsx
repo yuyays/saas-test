@@ -5,9 +5,9 @@ import { getSession } from "@/lib/auth/session";
 import { getTeamForUser, getUser } from "@/lib/db/queries";
 
 import { getMediaById } from "../queries";
-import MediaDetails from "./MediaDetails";
-import { MediaFile } from "../GalleryList";
-import ErrorMessage from "../ErrorMessage";
+import MediaDetails from "../../../../components/galleries/fileId/MediaDetails";
+import { MediaFile } from "../../../../components/galleries/GalleryList";
+import ErrorMessage from "../../../../components/galleries/ErrorMessage";
 
 export default async function MediaPage({
   params,

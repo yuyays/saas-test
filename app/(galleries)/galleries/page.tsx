@@ -1,9 +1,11 @@
-import GalleryList, { MediaFile } from "./GalleryList";
+import GalleryList, {
+  MediaFile,
+} from "../../../components/galleries/GalleryList";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { fetchMedia } from "./queries";
-import { EmptyGallery } from "./EmptyGallery";
-import ErrorMessage from "./ErrorMessage";
+import { EmptyGallery } from "../../../components/galleries/EmptyGallery";
+import ErrorMessage from "../../../components/galleries/ErrorMessage";
 
 export default async function GalleryPage() {
   const session = await getSession();

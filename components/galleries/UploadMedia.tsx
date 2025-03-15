@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { LoadingSpinner } from "@/components/ui/spinner";
-import { uploadMediaToDatabase } from "./queries";
+import { uploadMediaToDatabase } from "../../app/(galleries)/galleries/queries";
 import { useToast } from "@/hooks/use-toast";
 import ErrorMessage from "./ErrorMessage";
 import { cn } from "@/lib/utils";

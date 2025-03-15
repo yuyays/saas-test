@@ -9,7 +9,11 @@ import { ArrowLeft, Edit2, Save, Trash2 } from "lucide-react";
 
 import { GalleryMedia } from "../GalleryMedia";
 import { MediaFile } from "../GalleryList";
-import { deleteMedia, saveEditedImage, updateMedia } from "../queries";
+import {
+  deleteMedia,
+  saveEditedImage,
+  updateMedia,
+} from "../../../app/(galleries)/galleries/queries";
 import { ImageEditor } from "./ImageEditor";
 
 type MediaDetailsProps = {

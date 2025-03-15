@@ -2,7 +2,7 @@
 import { userMedia } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/drizzle";
-import { MediaFile } from "./GalleryList";
+import { MediaFile } from "../../../components/galleries/GalleryList";
 import imageKit from "@/lib/iamgeKit";
 import { FileDetailsOptions } from "imagekit/dist/libs/interfaces/FileDetails";
 import { getSession } from "@/lib/auth/session";
@@ -20,10 +20,7 @@ export async function fetchMedia(userId: number): Promise<MediaFile[]> {
     const userMediaItems = await db
       .select()
       .from(userMedia)
-      .where(and(
-        eq(userMedia.userId, userId),
-        eq(userMedia.status, "active")
-      ));
+      .where(and(eq(userMedia.userId, userId), eq(userMedia.status, "active")));
 
     const mediaPromises = userMediaItems.map(async (item) => {
       try {
@@ -38,7 +35,10 @@ export async function fetchMedia(userId: number): Promise<MediaFile[]> {
         } as MediaFile;
       } catch (error) {
         // If file not found in ImageKit, mark it as deleted in our database
-        if (error instanceof Error && error.message.includes("does not exist")) {
+        if (
+          error instanceof Error &&
+          error.message.includes("does not exist")
+        ) {
           await markMediaAsDeleted(item.fileId);
         }
         // Skip this media item
@@ -86,11 +86,13 @@ export async function getMediaById(
     const mediaItem = await db
       .select()
       .from(userMedia)
-      .where(and(
-        eq(userMedia.fileId, fileId),
-        eq(userMedia.userId, userId),
-        eq(userMedia.status, "active")
-      ))
+      .where(
+        and(
+          eq(userMedia.fileId, fileId),
+          eq(userMedia.userId, userId),
+          eq(userMedia.status, "active")
+        )
+      )
       .limit(1);
 
     if (!mediaItem || mediaItem.length === 0) {

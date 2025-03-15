@@ -1,7 +1,7 @@
 "use client";
 
 import MediaUploadComponent from "./UploadMedia";
-import { useContainerWidth } from "./hooks/useContainerWidth";
+import { useContainerWidth } from "../../hooks/galleries/useContainerWidth";
 import { GalleryGrid } from "./GalleryGrid";
 
 export type MediaFile = {
