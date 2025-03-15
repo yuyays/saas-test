@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CustomizePanel } from "@/app/(galleries)/galleries/[fileId]/CustomizePanel";
-import { MediaFile } from "@/app/(galleries)/galleries/GalleryList";
+import { CustomizePanel } from "@/components/galleries/fileId/CustomizePanel";
+import { MediaFile } from "@/components/galleries/GalleryList";
 import { uploadAnonymousImage } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 

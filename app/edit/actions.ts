@@ -6,7 +6,7 @@ import { userMedia } from "@/lib/db/schema";
 import imageKit from "@/lib/iamgeKit";
 import { ratelimit } from "@/lib/db/ratelimit";
 import { cookies } from "next/headers";
-import { MediaFile } from "../(galleries)/galleries/GalleryList";
+import { MediaFile } from "../../components/galleries/GalleryList";
 import { eq, sql } from "drizzle-orm";
 
 export async function uploadAnonymousImage(
