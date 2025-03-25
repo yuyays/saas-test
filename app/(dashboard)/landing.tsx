@@ -133,7 +133,7 @@ export const LandingPage: React.FC = () => {
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   className="w-full h-auto object-cover"
-                  src="https://ik.imagekit.io/gus5alhna/Screenshot%20from%202024-12-25%2019-49-31.png?updatedAt=1735123789055"
+                  src="https://ik.imagekit.io/gus5alhna/Screenshot%20from%202024-12-25%2019-49-31.png?updatedAt=1742913428082"
                   alt="Media Editor Preview"
                   width={1200}
                   height={675}
