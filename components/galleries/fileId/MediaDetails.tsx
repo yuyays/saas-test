@@ -114,8 +114,27 @@ export default function MediaDetails({
       </div>
 
       {/* Media Display */}
-      <div className="aspect-video w-full max-w-4xl mx-auto">
-        <GalleryMedia item={media} containerWidth={1024} />
+      <div
+        className="relative w-full max-w-4xl mx-auto bg-black flex items-center justify-center"
+        style={{
+          aspectRatio: media.width && media.height ? media.width / media.height : 16 / 9,
+        }}
+      >
+        {/* Use next/image if available, otherwise fallback to img */}
+        {media.url ? (
+          <img
+            src={media.url}
+            alt={media.name}
+            className="w-full h-full object-contain"
+            style={{ maxHeight: '70vh', background: 'black' }}
+            width={media.width}
+            height={media.height}
+            draggable={false}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white">No image</div>
+        )}
+        {/* Place overlays here if needed, absolutely positioned */}
       </div>
 
       {/* Image Editor */}

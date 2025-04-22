@@ -448,17 +448,28 @@ export function CustomizePanel({ file, onSave, team }: CustomizePanelProps) {
       </div>
 
       {/* Preview Section */}
-      <div className="relative flex items-center justify-center bg-gray-100 rounded-lg p-4">
-        <div className="relative max-w-full max-h-full">
-          <IKImage
-            src={file.url}
-            alt={file.name}
-            width={1200}
-            height={800}
-            className="rounded-md object-contain max-h-[70vh]"
-            transformation={Object.values(transformations)}
-          />
-        </div>
+      <div
+        className="relative flex items-center justify-center bg-gray-100 rounded-lg p-4"
+        style={{
+          aspectRatio:
+            (imageSize?.width && imageSize?.height)
+              ? `${imageSize.width} / ${imageSize.height}`
+              : (file.width && file.height)
+                ? `${file.width} / ${file.height}`
+                : '16/9',
+          width: '100%',
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
+      >
+        <IKImage
+          src={file.url}
+          alt={file.name}
+          className="rounded-md object-contain w-full h-full max-h-[70vh]"
+          transformation={Object.values(transformations)}
+          width={imageSize?.width || file.width || 800}
+          height={imageSize?.height || file.height || 600}
+        />
       </div>
     </div>
   );
