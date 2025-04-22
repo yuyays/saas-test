@@ -82,14 +82,15 @@ export async function uploadAnonymousImage(
 export async function cleanupTemporaryFiles() {
   const oneDayAgo = new Date();
   oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+  const oneDayAgoIso = oneDayAgo.toISOString();
 
   try {
     // Find temporary files older than 24 hours
     const expiredFiles = await db
       .select()
       .from(userMedia)
-      .where(sql`status = 'temporary' AND created_at < ${oneDayAgo}`);
-
+      .where(sql`status = 'temporary' AND created_at < ${oneDayAgoIso}`);
+    console.log(expiredFiles);
     // Delete from ImageKit and database
     for (const file of expiredFiles) {
       try {
