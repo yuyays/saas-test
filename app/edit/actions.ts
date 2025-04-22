@@ -90,23 +90,43 @@ export async function cleanupTemporaryFiles() {
       .select()
       .from(userMedia)
       .where(sql`status = 'temporary' AND created_at < ${oneDayAgoIso}`);
-    console.log(expiredFiles);
+    // Log each expired file's details for debugging
+    expiredFiles.forEach((file) => {
+      console.log(
+        `Expiring file: fileId=${file.fileId}, created_at=${file.createdAt}, status=${file.status}`
+      );
+    });
     // Delete from ImageKit and database
     for (const file of expiredFiles) {
+      let fileDeleted = false;
       try {
         await imageKit.deleteFile(file.fileId);
-      } catch (error) {
-        console.error(
-          `Failed to delete file ${file.fileId} from ImageKit:`,
-          error
-        );
+        fileDeleted = true;
+      } catch (error: any) {
+        // Gracefully handle 'file does not exist' error from ImageKit
+        if (
+          error?.message === "The requested file does not exist." ||
+          error?.message?.includes("The requested file does not exist.")
+        ) {
+          console.info(
+            `File ${file.fileId} does not exist in ImageKit. Marking as deleted in DB.`
+          );
+        } else {
+          console.error(
+            `Failed to delete file ${file.fileId} from ImageKit:`,
+            error
+          );
+          // Optionally, skip DB update if delete failed for other reasons
+        }
       }
 
+      // Mark as deleted in DB regardless if file was already deleted in ImageKit
       await db
         .update(userMedia)
         .set({ status: "deleted" })
         .where(eq(userMedia.fileId, file.fileId));
     }
+    // NOTE: If files are not being deleted as expected, review the DB date format for created_at. It should be ISO string or compatible with toISOString().
 
     return { success: true, deletedCount: expiredFiles.length };
   } catch (error) {
