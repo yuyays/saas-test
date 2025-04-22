@@ -457,8 +457,8 @@ export function CustomizePanel({ file, onSave, team }: CustomizePanelProps) {
               : (file.width && file.height)
                 ? `${file.width} / ${file.height}`
                 : '16/9',
-          width: '100%',
-          maxWidth: '600px',
+          maxWidth: 'min(90vw, 1024px)',
+          maxHeight: '80vh',
           margin: '0 auto',
         }}
       >

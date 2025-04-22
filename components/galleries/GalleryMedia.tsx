@@ -34,8 +34,8 @@ export function GalleryMedia({
         <IKImage
           src={item.url}
           alt={item.name}
-          width={containerWidth}
-          height={(containerWidth * 9) / 16}
+          width={item.width || containerWidth || 800}
+          height={item.height || (containerWidth ? (containerWidth * 9) / 16 : 600)}
           className="rounded-md object-cover w-full h-full"
           onLoad={() => setIsLoading(false)}
           onError={() => setIsLoading(false)}
