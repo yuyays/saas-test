@@ -4,7 +4,6 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/drizzle";
 import { MediaFile } from "../../../components/galleries/GalleryList";
 import imageKit from "@/lib/iamgeKit";
-import { FileDetailsOptions } from "imagekit/dist/libs/interfaces/FileDetails";
 import { getSession } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { ratelimit } from "@/lib/db/ratelimit";
@@ -24,7 +23,7 @@ export async function fetchMedia(userId: number): Promise<MediaFile[]> {
 
     const mediaPromises = userMediaItems.map(async (item) => {
       try {
-        const fileDetails = await imageKit.getFileDetails(item.fileId);
+        const fileDetails = await imageKit.files.get(item.fileId);
         return {
           fileId: fileDetails.fileId,
           name: fileDetails.name,
@@ -100,7 +99,7 @@ export async function getMediaById(
     }
 
     try {
-      const fileDetails = await imageKit.getFileDetails(fileId);
+      const fileDetails = await imageKit.files.get(fileId);
       return {
         fileId: fileDetails.fileId,
         name: fileDetails.name,
@@ -144,7 +143,7 @@ export async function deleteMedia(fileId: string, userId: number) {
       .where(and(eq(userMedia.fileId, fileId), eq(userMedia.userId, userId)));
 
     // Delete from ImageKit
-    await imageKit.deleteFile(fileId);
+    await imageKit.files.delete(fileId);
 
     return true;
   } catch (error) {
@@ -205,12 +204,12 @@ export async function saveEditedImage(
     }
 
     // Get the original file details
-    const fileDetails = await imageKit.getFileDetails(fileId);
+    const fileDetails = await imageKit.files.get(fileId);
 
     // Generate transformed URL using ImageKit's method
-    const transformedUrl = imageKit.url({
-      path: `/${fileDetails.name}`,
-      urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT,
+    const transformedUrl = imageKit.helper.buildSrc({
+      src: `/${fileDetails.name}`,
+      urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT!,
       transformation: transformations,
       transformationPosition: "path",
       queryParameters: {

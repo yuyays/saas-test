@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IKImage } from "imagekitio-next";
+import { Image as IKImage } from "@imagekit/next";
 import { Plus, Trash2, Download, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";

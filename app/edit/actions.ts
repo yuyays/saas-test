@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db/drizzle";
 import { userMedia } from "@/lib/db/schema";
 import imageKit from "@/lib/iamgeKit";
+import { toFile } from "@imagekit/nodejs";
 import { ratelimit } from "@/lib/db/ratelimit";
 import { cookies } from "next/headers";
 import { MediaFile } from "../../components/galleries/GalleryList";
@@ -40,8 +41,8 @@ export async function uploadAnonymousImage(
     // Upload to ImageKit
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const uploadResponse = await imageKit.upload({
-      file: buffer, // Pass buffer instead of File object
+    const uploadResponse = await imageKit.files.upload({
+      file: await toFile(buffer, file.name),
       fileName: `anon-${anonymousId.substring(0, 8)}-${file.name}`,
 
       useUniqueFileName: true,
@@ -51,23 +52,23 @@ export async function uploadAnonymousImage(
     // Store in database with anonymous flag
     await db.insert(userMedia).values({
       userId: 0, // Special ID for anonymous users
-      fileId: uploadResponse.fileId,
-      name: uploadResponse.name,
-      url: uploadResponse.url,
-      fileType: uploadResponse.fileType,
-      height: uploadResponse.height,
-      width: uploadResponse.width,
+      fileId: uploadResponse.fileId!,
+      name: uploadResponse.name!,
+      url: uploadResponse.url!,
+      fileType: uploadResponse.fileType!,
+      height: uploadResponse.height!,
+      width: uploadResponse.width!,
       status: "temporary", // Mark as temporary for cleanup
       createdAt: new Date(),
     });
 
     return {
-      fileId: uploadResponse.fileId,
-      name: uploadResponse.name,
-      url: uploadResponse.url,
-      fileType: uploadResponse.fileType,
-      height: uploadResponse.height,
-      width: uploadResponse.width,
+      fileId: uploadResponse.fileId!,
+      name: uploadResponse.name!,
+      url: uploadResponse.url!,
+      fileType: uploadResponse.fileType!,
+      height: uploadResponse.height!,
+      width: uploadResponse.width!,
     };
   } catch (error) {
     console.error("Failed to upload anonymous image:", error);
@@ -100,7 +101,7 @@ export async function cleanupTemporaryFiles() {
     for (const file of expiredFiles) {
       let fileDeleted = false;
       try {
-        await imageKit.deleteFile(file.fileId);
+        await imageKit.files.delete(file.fileId);
         fileDeleted = true;
       } catch (error: any) {
         // Gracefully handle 'file does not exist' error from ImageKit

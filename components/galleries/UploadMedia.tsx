@@ -1,6 +1,6 @@
 "use client";
 
-import { IKUpload } from "imagekitio-next";
+import { upload } from "@imagekit/next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,41 +24,49 @@ export default function MediaUploadComponent() {
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
 
-  const onError = (err: any) => {
-    console.error("Upload Error:", err);
-    setUploading(false);
-    toast({
-      description: "Failed to upload media",
-    });
-  };
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const onSuccess = async (res: any) => {
-    setError(null); // Clear any previous errors
-    setUploading(false);
+    setError(null);
+    setUploading(true);
 
     try {
+      const authResp = await fetch("/api/auth");
+      if (!authResp.ok) throw new Error("Failed to get auth params");
+      const { signature, expire, token } = await authResp.json();
+
+      const res = await upload({
+        file,
+        fileName: file.name,
+        signature,
+        expire,
+        token,
+        publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY!,
+        useUniqueFileName: true,
+      });
+
       await uploadMediaToDatabase({
-        fileId: res.fileId,
-        name: res.name,
-        url: res.url,
-        fileType: res.fileType,
-        height: res.height,
-        width: res.width,
+        fileId: res.fileId!,
+        name: res.name!,
+        url: res.url!,
+        fileType: res.fileType!,
+        height: res.height!,
+        width: res.width!,
       });
 
       toast({
         description: "Media uploaded successfully",
       });
       setIsOpen(false);
-    } catch (error) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       let errorMessage = "An error occurred while saving media.";
 
-      if (error instanceof Error) {
-        if (error.message === "RATE_LIMIT_EXCEEDED") {
-          errorMessage = "Rate limit exceeded. Please try again later.";
-        } else {
-          errorMessage = error.message;
-        }
+      if (message === "RATE_LIMIT_EXCEEDED") {
+        errorMessage = "Rate limit exceeded. Please try again later.";
+      } else {
+        errorMessage = message;
       }
 
       setError(errorMessage);
@@ -67,6 +75,9 @@ export default function MediaUploadComponent() {
         title: "Error",
         description: errorMessage,
       });
+    } finally {
+      e.target.value = "";
+      setUploading(false);
     }
   };
 
@@ -134,16 +145,12 @@ export default function MediaUploadComponent() {
                 </div>
               )}
 
-              <IKUpload
-                fileName="test-upload.png"
-                onError={onError}
-                onSuccess={onSuccess}
-                onUploadStart={() => {
-                  setUploading(true);
-                  setError(null);
-                }}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              <input
+                type="file"
                 accept="image/*,video/*"
+                onChange={handleFileSelect}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={uploading}
               />
             </div>
 
@@ -174,16 +181,6 @@ export default function MediaUploadComponent() {
                 disabled={uploading}
               >
                 Cancel
-              </Button>
-              <Button
-                disabled={uploading}
-                onClick={() =>
-                  document
-                    .querySelector<HTMLInputElement>('input[type="file"]')
-                    ?.click()
-                }
-              >
-                Select File
               </Button>
             </div>
           </div>

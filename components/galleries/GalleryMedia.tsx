@@ -1,4 +1,4 @@
-import { IKImage, IKVideo } from "imagekitio-next";
+import { Image as IKImage, Video as IKVideo } from "@imagekit/next";
 import { MediaFile } from "./GalleryList";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { useState } from "react";
