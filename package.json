@@ -43,11 +43,11 @@
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.24.2",
     "drizzle-orm": "^0.45.2",
-    "esbuild": "^0.25.3",
+    "esbuild": "^0.28.1",
     "jose": "^5.10.0",
     "lucide-react": "^0.441.0",
-    "next": "^15.5.20",
-    "postcss": "^8.5.16",
+    "next": "^15.5.28",
+    "postcss": "^8.5.23",
     "postgres": "^3.4.5",
     "react": "19.0.0-rc-4d577fd2-20241104",
     "react-dom": "19.0.0-rc-4d577fd2-20241104",
@@ -59,7 +59,7 @@
     "tailwindcss-react-aria-components": "1.1.5",
     "typescript": "^5.8.2",
     "uuid": "^11.1.1",
-    "zod": "^3.24.2"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6"
